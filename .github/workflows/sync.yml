@@ -26,12 +26,6 @@ jobs:
           repository: DavidSebas20/domain-patient-management
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           path: domain_repo
-      
-      - name: Debug repository state
-        run: |
-          cd domain_repo
-          git status
-          git log --oneline -n 5
 
       - name: Copy microservice to domain repository
         run: |
@@ -47,9 +41,15 @@ jobs:
             git checkout -b ${{ github.ref_name }}
             git push origin ${{ github.ref_name }}
           else
-            git checkout ${{ github.ref_name }}
-            git pull origin ${{ github.ref_name }} --rebase  # Usamos --rebase para evitar merges innecesarios
+            git checkout ${{ github.ref_name }}  
+            git pull origin ${{ github.ref_name }} --rebase  
           fi
+
+      - name: Debug repository state
+        run: |
+          cd domain_repo
+          git status
+          git log --oneline -n 5
 
       - name: Commit and push changes
         run: |
@@ -62,5 +62,5 @@ jobs:
             exit 0
           fi
           git commit -m "Sync ms-updatepatients: ${CHANGED_FILES}"
-          git pull origin ${{ github.ref_name }} --rebase  # Actualizamos nuevamente antes de push
+          git pull origin ${{ github.ref_name }} --rebase  
           git push origin ${{ github.ref_name }}
