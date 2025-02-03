@@ -1,12 +1,10 @@
 name: Sync ms-updatepatients to Domain Repository
-
 on:
   push:
     branches:
       - QA
       - Dev
       - main
-
 jobs:
   sync:
     runs-on: ubuntu-latest
@@ -32,7 +30,7 @@ jobs:
           rm -rf domain_repo/ms-updatepatients
           mkdir -p domain_repo/ms-updatepatients
           rsync -av --exclude='.git' . domain_repo/ms-updatepatients/
-       
+
       - name: Ensure branch exists in domain repository
         run: |
           cd domain_repo
@@ -42,11 +40,15 @@ jobs:
             git push origin ${{ github.ref_name }}
           else
             git checkout ${{ github.ref_name }}
+            # Sincronizar la rama local con la remota
+            git pull origin ${{ github.ref_name }}
           fi
 
       - name: Commit and push changes
         run: |
           cd domain_repo
+          git config --global user.email "davidsebastian20@outlook.com"
+          git config --global user.name "DavidSebas20"
           git add .
           if git diff --staged --quiet; then
             echo "No changes to commit."
