@@ -1,0 +1,58 @@
+name: Sync ms-updatepatients to Domain Repository
+
+on:
+  push:
+    branches:
+      - QA
+      - Dev
+      - main
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout microservice repository
+        uses: actions/checkout@v3
+
+      - name: Get list of changed files
+        id: changed_files
+        run: |
+          git fetch origin ${{ github.ref_name }}
+          echo "CHANGED_FILES=$(git diff --name-only HEAD^ HEAD | tr '\n' ' ')" >> $GITHUB_ENV
+
+      - name: Checkout domain repository
+        uses: actions/checkout@v3
+        with:
+          repository: DavidSebas20/domain-patient-management
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          path: domain_repo
+
+      - name: Copy microservice to domain repository
+        run: |
+          rm -rf domain_repo/ms-updatepatients
+          mkdir -p domain_repo/ms-updatepatients
+          rsync -av --exclude='.git' . domain_repo/ms-updatepatients/
+       
+      - name: Ensure branch exists in domain repository
+        run: |
+          cd domain_repo
+          git fetch origin
+          if ! git show-ref --verify --quiet refs/heads/${{ github.ref_name }}; then
+            git checkout -b ${{ github.ref_name }}
+            git push origin ${{ github.ref_name }}
+          else
+            git checkout ${{ github.ref_name }}
+          fi
+
+      - name: Commit and push changes
+        run: |
+          cd domain_repo
+          git config --global user.email "davidsebastian20@outlook.com"
+          git config --global user.name "DavidSebas20"
+          git add .
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "Sync ms-updatepatients: ${CHANGED_FILES}"
+          git push origin ${{ github.ref_name }}
