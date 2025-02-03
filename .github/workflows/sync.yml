@@ -36,12 +36,14 @@ jobs:
           cd domain_repo
           git fetch origin
           if ! git show-ref --verify --quiet refs/heads/${{ github.ref_name }}; then
+            # Si la rama no existe, crearla y hacer push
             git checkout -b ${{ github.ref_name }}
             git push origin ${{ github.ref_name }}
           else
+            # Si la rama existe, cambiar a ella y sincronizar con la remota
             git checkout ${{ github.ref_name }}
-            # Sincronizar la rama local con la remota
-            git pull origin ${{ github.ref_name }}
+            git fetch origin ${{ github.ref_name }}
+            git merge origin/${{ github.ref_name }} --strategy-option theirs || true
           fi
 
       - name: Commit and push changes
