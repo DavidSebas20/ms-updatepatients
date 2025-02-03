@@ -27,11 +27,12 @@ jobs:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           path: domain_repo
 
-      - name: Copy microservice to domain repository
+      - name: Clean up existing files in domain repository
         run: |
-          rm -rf domain_repo/ms-updatepatients
-          mkdir -p domain_repo/ms-updatepatients
-          rsync -av --exclude='.git' . domain_repo/ms-updatepatients/
+          cd domain_repo
+          # Eliminar archivos no rastreados antes de cambiar de rama
+          git clean -fd
+          git reset --hard
 
       - name: Ensure branch exists in domain repository
         run: |
@@ -46,6 +47,12 @@ jobs:
             git pull origin ${{ github.ref_name }} --rebase
           fi
 
+      - name: Copy microservice to domain repository
+        run: |
+          rm -rf domain_repo/ms-updatepatients
+          mkdir -p domain_repo/ms-updatepatients
+          rsync -av --exclude='.git' . domain_repo/ms-updatepatients/
+
       - name: Commit and push changes
         run: |
           cd domain_repo
@@ -57,6 +64,6 @@ jobs:
             exit 0
           fi
           git commit -m "${{ env.COMMIT_MSG }}"
-          # Sincronizar nuevamente antes de hacer push
-          git pull origin ${{ github.ref_name }} --rebase || true
+          # Resolver conflictos automáticamente si es necesario
+          git pull origin ${{ github.ref_name }} --rebase || git merge origin/${{ github.ref_name }} --strategy-option theirs
           git push origin ${{ github.ref_name }}
