@@ -11,12 +11,14 @@ jobs:
     steps:
       - name: Checkout microservice repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Necesario para acceder al historial completo de commits
 
-      - name: Get list of changed files
-        id: changed_files
+      - name: Get latest commit message
+        id: commit_message
         run: |
-          git fetch origin ${{ github.ref_name }}
-          echo "CHANGED_FILES=$(git diff --name-only HEAD^ HEAD | tr '\n' ' ')" >> $GITHUB_ENV
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "COMMIT_MSG=$COMMIT_MSG" >> $GITHUB_ENV
 
       - name: Checkout domain repository
         uses: actions/checkout@v3
@@ -54,5 +56,5 @@ jobs:
             echo "No changes to commit."
             exit 0
           fi
-          git commit -m "Sync ms-updatepatients: ${CHANGED_FILES}"
+          git commit -m "${{ env.COMMIT_MSG }}"
           git push origin ${{ github.ref_name }}
