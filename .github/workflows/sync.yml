@@ -41,26 +41,16 @@ jobs:
             git checkout -b ${{ github.ref_name }}
             git push origin ${{ github.ref_name }}
           else
-            git checkout ${{ github.ref_name }}  
-            git pull origin ${{ github.ref_name }} --rebase  
+            git checkout ${{ github.ref_name }}
           fi
-
-      - name: Debug repository state
-        run: |
-          cd domain_repo
-          git status
-          git log --oneline -n 5
 
       - name: Commit and push changes
         run: |
           cd domain_repo
-          git config --global user.email "davidsebastian20@outlook.com"
-          git config --global user.name "DavidSebas20"
           git add .
           if git diff --staged --quiet; then
             echo "No changes to commit."
             exit 0
           fi
           git commit -m "Sync ms-updatepatients: ${CHANGED_FILES}"
-          git pull origin ${{ github.ref_name }} --rebase  
           git push origin ${{ github.ref_name }}
