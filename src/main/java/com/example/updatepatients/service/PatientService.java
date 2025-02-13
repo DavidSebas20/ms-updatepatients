@@ -3,6 +3,7 @@ package com.example.updatepatients.service;
 import com.example.updatepatients.entity.*;
 import com.example.updatepatients.repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -17,8 +18,11 @@ public class PatientService {
     @Autowired
     private PatientRepository patientRepository;
 
-    private static final String PASSWORD_VERIFY_URL = "http://localhost:8080/verify";
-    private static final String PASSWORD_HASH_URL = "http://localhost:8080/hash";
+    @Value("${password.hash.url}")
+    private String PASSWORD_HASH_URL;
+
+    @Value("${password.verify.url}")
+    private String PASSWORD_VERIFY_URL;
 
     public Optional<Patient> updatePatient(Long id, Patient updatedPatient, String password, Optional<String> newPassword) {
         Optional<Patient> existingPatient = patientRepository.findById(id);
