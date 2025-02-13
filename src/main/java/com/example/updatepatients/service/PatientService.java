@@ -17,10 +17,10 @@ public class PatientService {
     @Autowired
     private PatientRepository patientRepository;
 
-    @Value("${password.hash.url}")
+    @Value("${hash.service.url}")
     private String PASSWORD_HASH_URL;
 
-    @Value("${password.verify.url}")
+    @Value("${verify.service.url}")
     private String PASSWORD_VERIFY_URL;
 
     public Optional<Patient> updatePatient(Long id, Patient updatedPatient, String password, Optional<String> newPassword) {
