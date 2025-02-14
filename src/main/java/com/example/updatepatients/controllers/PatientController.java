@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/patients")
+@RequestMapping("/update-patient/patients")
 public class PatientController {
 
     @Autowired
@@ -25,5 +25,10 @@ public class PatientController {
         return patientService.updatePatient(id, updatedPatient, password, Optional.ofNullable(newPassword))
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.status(403).build());
+    }
+
+    @GetMapping("/health")
+    public ResponseEntity<String> healthCheck() {
+        return ResponseEntity.ok("Healthy");
     }
 }

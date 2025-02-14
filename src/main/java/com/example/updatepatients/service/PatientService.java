@@ -3,12 +3,12 @@ package com.example.updatepatients.service;
 import com.example.updatepatients.entity.*;
 import com.example.updatepatients.repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -17,8 +17,11 @@ public class PatientService {
     @Autowired
     private PatientRepository patientRepository;
 
-    private static final String PASSWORD_VERIFY_URL = "http://localhost:8080/verify";
-    private static final String PASSWORD_HASH_URL = "http://localhost:8080/hash";
+    @Value("${hash.service.url}")
+    private String PASSWORD_HASH_URL;
+
+    @Value("${verify.service.url}")
+    private String PASSWORD_VERIFY_URL;
 
     public Optional<Patient> updatePatient(Long id, Patient updatedPatient, String password, Optional<String> newPassword) {
         Optional<Patient> existingPatient = patientRepository.findById(id);
@@ -54,7 +57,7 @@ public class PatientService {
         try {
             HttpEntity<VerifyRequest> request = new HttpEntity<>(verifyRequest);
             ResponseEntity<VerifyResponse> response = restTemplate.postForEntity(PASSWORD_VERIFY_URL, request, VerifyResponse.class);
-            return response.getBody() != null && response.getBody().isMatch();
+            return response.getBody() != null && response.getBody().isValid();
         } catch (Exception e) {
             e.printStackTrace();
             return password.equals(hash);
